@@ -5,6 +5,7 @@ import axios from "axios";
 
 export default function Login() {
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
 
   const [form, setForm] = useState({
     username: "",
@@ -19,6 +20,7 @@ export default function Login() {
     }
 
     try {
+      setLoading(true);
       let endpoint = "";
 
       if (form.role === "ADMIN") {
@@ -36,10 +38,7 @@ export default function Login() {
       });
 
       const data = res.data;
-
-      const cleanRole = data.role
-        ? data.role.replace("ROLE_", "")
-        : data.userType;
+      const cleanRole = data.role ? data.role.replace("ROLE_", "") : data.userType;
 
       localStorage.setItem("accessToken", data.accessToken);
       localStorage.setItem("refreshToken", data.refreshToken);
@@ -52,77 +51,88 @@ export default function Login() {
         else if (cleanRole === "ANALYST") navigate("/analyst");
         else navigate("/user");
       }, 800);
-
     } catch (err) {
       toast.error(err.response?.data?.error || "Invalid credentials");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <div className="wrapper">
       <div className="login-card">
-
+        {/* Branding */}
         <div className="brand">
           <h1>IP Intelligence</h1>
-          <p>Secure Access Portal</p>
+          <p>Secure Enterprise Access Portal 🔒</p>
         </div>
 
         <h2>Welcome Back</h2>
-        <span className="subtitle">
-          Login to continue to your dashboard
-        </span>
+        <span className="subtitle">Login to continue to your dashboard</span>
 
+        {/* Username */}
         <input
           type="text"
           placeholder="Username"
           value={form.username}
-          onChange={(e) =>
-            setForm({ ...form, username: e.target.value })
-          }
+          onChange={(e) => setForm({ ...form, username: e.target.value })}
         />
 
+        {/* Password */}
         <input
           type="password"
           placeholder="Password"
           value={form.password}
-          onChange={(e) =>
-            setForm({ ...form, password: e.target.value })
-          }
+          onChange={(e) => setForm({ ...form, password: e.target.value })}
         />
 
-        {/* 🔥 FIXED DROPDOWN */}
-        <div className="select-wrapper">
-          <select
-            value={form.role}
-            onChange={(e) =>
-              setForm({ ...form, role: e.target.value })
-            }
-            className="role-select"
-          >
-            <option value="USER">USER</option>
-            <option value="ANALYST">ANALYST</option>
-            <option value="ADMIN">ADMIN</option>
-          </select>
-          <span className="arrow">▼</span>
+        {/* Role Selection as Cards */}
+        <div className="role-cards">
+          {["USER", "ANALYST", "ADMIN"].map((r) => (
+            <div
+              key={r}
+              onClick={() => setForm({ ...form, role: r })}
+              className={`role-card ${form.role === r ? "active" : ""}`}
+            >
+              <h3>{r}</h3>
+            </div>
+          ))}
         </div>
 
-        <button onClick={handleLogin} className="primary-btn">
-          Sign In
+        {/* Sign In Button */}
+        <button
+          onClick={handleLogin}
+          className="primary-btn"
+          disabled={loading}
+        >
+          {loading ? "Signing In..." : "Sign In"}
         </button>
 
+        {/* Register Link */}
         <button
           className="secondary-btn"
           onClick={() => navigate("/register")}
         >
           Create New Account
         </button>
-
       </div>
 
+      {/* Footer */}
+      <footer className="footer">
+        <div className="links">
+          <button className="link">Privacy Policy</button>
+          <button className="link">Terms of Use</button>
+          <button className="link">Contact</button>
+        </div>
+        <p className="copy">© 2026 Global IP Intelligence Platform</p>
+      </footer>
+
+      {/* Styles */}
       <style>{`
         .wrapper {
           min-height: 100vh;
           display: flex;
+          flex-direction: column;
           justify-content: center;
           align-items: center;
           background: linear-gradient(135deg, #0f172a, #1e293b);
@@ -151,7 +161,7 @@ export default function Login() {
         }
 
         .brand h1 {
-          font-size: 18px;
+          font-size: 20px;
           letter-spacing: 2px;
           font-weight: 600;
           color: #38bdf8;
@@ -193,35 +203,30 @@ export default function Login() {
           box-shadow: 0 0 0 3px rgba(56,189,248,0.2);
         }
 
-        /* 🔥 Dropdown Fix */
-        .select-wrapper {
-          position: relative;
+        /* Role Cards */
+        .role-cards {
+          display: flex;
+          gap: 12px;
+          margin: 10px 0;
         }
-
-        .role-select {
-          width: 100%;
+        .role-card {
+          flex: 1;
           padding: 14px;
           border-radius: 12px;
           border: 1px solid rgba(255,255,255,0.2);
           background: rgba(255,255,255,0.08);
           color: white;
-          font-size: 14px;
-          appearance: none;
+          text-align: center;
+          cursor: pointer;
+          transition: all 0.3s ease;
         }
-
-        .role-select option {
-          background: #1e293b;
-          color: white;
+        .role-card:hover {
+          background: rgba(56,189,248,0.2);
         }
-
-        .arrow {
-          position: absolute;
-          right: 15px;
-          top: 50%;
-          transform: translateY(-50%);
-          pointer-events: none;
-          color: white;
-          font-size: 12px;
+        .role-card.active {
+          border-color: #38bdf8;
+          background: rgba(56,189,248,0.3);
+          font-weight: 600;
         }
 
         .primary-btn {
@@ -236,7 +241,12 @@ export default function Login() {
           transition: all 0.3s ease;
         }
 
-        .primary-btn:hover {
+        .primary-btn:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
+        }
+
+        .primary-btn:hover:not(:disabled) {
           transform: translateY(-2px);
           box-shadow: 0 15px 30px rgba(37,99,235,0.4);
         }
@@ -255,6 +265,37 @@ export default function Login() {
         .secondary-btn:hover {
           background: rgba(255,255,255,0.1);
           transform: translateY(-2px);
+        }
+
+        .footer {
+          margin-top: 20px;
+          text-align: center;
+          color: white;
+          opacity: 0.8;
+        }
+
+        .links {
+          display: flex;
+          justify-content: center;
+          gap: 20px;
+          margin-bottom: 8px;
+        }
+
+        .link {
+          background: none;
+          border: none;
+          color: white;
+          cursor: pointer;
+          font-size: 13px;
+          transition: color 0.3s ease;
+        }
+
+        .link:hover {
+          color: #38bdf8;
+        }
+
+        .copy {
+          font-size: 12px;
         }
 
         @media (max-width: 500px) {
