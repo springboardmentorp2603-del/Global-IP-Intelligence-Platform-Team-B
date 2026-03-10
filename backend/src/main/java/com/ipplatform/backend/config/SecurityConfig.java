@@ -97,7 +97,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/analyst/logout").hasRole("ANALYST")
                         .requestMatchers(HttpMethod.GET, "/api/analyst/me").hasRole("ANALYST")
                         .requestMatchers("/api/subscriptions/**")
-                        .hasAnyRole("ANALYST", "ADMIN")
+                        .hasAnyRole("USER", "ANALYST", "ADMIN")
                         .requestMatchers("/api/notifications/**")
                         .hasAnyRole("ANALYST", "ADMIN")
                         .requestMatchers("/api/landscape/**")
