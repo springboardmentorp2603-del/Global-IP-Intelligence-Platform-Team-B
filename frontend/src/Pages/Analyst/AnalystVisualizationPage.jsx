@@ -330,3 +330,6 @@ function Stat({ title, value, color="text-indigo-400" }) {
 function count(data, status) {
   return data.filter(p => p.patentStatus === status).length;
 }
+
+
+

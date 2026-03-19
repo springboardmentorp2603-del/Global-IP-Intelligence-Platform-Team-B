@@ -271,3 +271,4 @@ function KpiCard({ title, value, color }) {
   );
 
 }
+
