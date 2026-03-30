@@ -47,104 +47,130 @@ export default function AdminApiHealthPage() {
 
   const isUp = health?.status === "UP";
 
-  return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Activity size={22} className="text-indigo-400" />
-          <h2 className="text-2xl font-bold text-white">API Health</h2>
-        </div>
-        <button
-          onClick={fetchHealth}
-          disabled={checking}
-          className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700
-                     disabled:opacity-50 rounded-lg text-sm font-medium transition
-                     shadow-lg shadow-indigo-500/20"
-        >
-          <Loader2 size={14} className={checking ? "animate-spin" : ""} />
-          {checking ? "Checking…" : "Refresh Now"}
-        </button>
+return (
+  <div className="space-y-8">
+
+    {/* 🔥 HEADER */}
+    <div className="flex justify-between items-center">
+      <div>
+        <h2 className="text-3xl font-bold text-white tracking-tight">
+          API Health Monitor
+        </h2>
+        <p className="text-gray-400 text-sm">
+          Real-time backend status monitoring
+        </p>
       </div>
 
-      {/* Card */}
-      <div className="bg-slate-800 rounded-2xl p-8 shadow-xl hover:shadow-indigo-500/20 transition-all duration-300">
+      <button
+        onClick={fetchHealth}
+        disabled={checking}
+        className="flex items-center gap-2 px-5 py-2 rounded-xl
+                   bg-gradient-to-r from-indigo-500 to-purple-600
+                   hover:scale-105 hover:shadow-lg hover:shadow-indigo-500/30
+                   disabled:opacity-50 transition-all"
+      >
+        <Loader2 size={16} className={checking ? "animate-spin" : ""} />
+        {checking ? "Checking..." : "Refresh"}
+      </button>
+    </div>
 
-        {/* Loading state (first load, no data yet) */}
+    {/* 🔥 MAIN CARD */}
+    <div className="relative">
+
+      {/* Glow */}
+      <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/20 via-purple-500/20 to-pink-500/20 blur-2xl opacity-30 rounded-3xl"></div>
+
+      <div className="relative bg-slate-900/70 backdrop-blur-2xl border border-slate-700 rounded-3xl p-8 shadow-2xl">
+
+        {/* Loading */}
         {checking && !health && (
           <div className="flex items-center gap-3 text-gray-400">
-            <Loader2 size={20} className="animate-spin" />
-            <span>Pinging Lens.org…</span>
+            <Loader2 size={22} className="animate-spin" />
+            <span>Checking API status...</span>
           </div>
         )}
 
         {health && (
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+          <div className="flex flex-col lg:flex-row justify-between items-center gap-10">
 
-            {/* Left — API identity */}
-            <div className="flex items-center gap-5">
-              <div className="w-16 h-16 rounded-2xl bg-slate-700 flex items-center justify-center
-                              text-2xl font-extrabold text-indigo-300 shadow-inner select-none">
-                L
+            {/* 🔥 LEFT */}
+            <div className="flex items-center gap-6">
+
+              {/* Status Circle */}
+              <div className={`w-20 h-20 rounded-full flex items-center justify-center
+                               text-xl font-bold
+                               ${isUp
+                                 ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/40"
+                                 : "bg-red-500/20 text-red-400 border border-red-500/40"}`}>
+
+                {isUp ? <CheckCircle size={28} /> : <XCircle size={28} />}
               </div>
+
+              {/* Info */}
               <div>
-                <p className="text-lg font-bold text-white">Lens.org</p>
-                <p className="text-sm text-gray-400">Patent Search API</p>
-                <p className="text-xs text-gray-500 mt-1">
-                  Auto-refreshes every 60 s · Last checked {formatDate(health.checkedAt)}
+                <p className="text-xl font-bold text-white">Lens API</p>
+                <p className="text-gray-400 text-sm">Patent Search Service</p>
+
+                <p className="text-xs text-gray-500 mt-2">
+                  Last checked: {formatDate(health.checkedAt)}
                 </p>
               </div>
             </div>
 
-            {/* Right — status */}
-            <div className="flex flex-col items-end gap-3 min-w-[160px]">
+            {/* 🔥 RIGHT */}
+            <div className="flex flex-col items-end gap-3">
 
-              {/* UP / DOWN badge */}
-              <span className={`flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-bold
+              {/* STATUS */}
+              <span className={`px-5 py-2 rounded-full text-sm font-bold
                                ${isUp
-                                 ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40"
-                                 : "bg-red-500/20 text-red-300 border border-red-500/40"}`}>
-                {isUp
-                  ? <CheckCircle size={15} />
-                  : <XCircle    size={15} />}
+                                 ? "bg-emerald-500/20 text-emerald-300"
+                                 : "bg-red-500/20 text-red-300"}`}>
                 {health.status}
               </span>
 
-              {/* Response time */}
+              {/* RESPONSE TIME */}
               {health.responseTimeMs != null && (
-                <span className={`text-sm font-semibold
-                                  ${health.responseTimeMs < 500 ? "text-emerald-400"
-                                    : health.responseTimeMs < 1500 ? "text-amber-400"
-                                    : "text-red-400"}`}>
-                  {health.responseTimeMs} ms
-                </span>
+                <div className="text-right">
+                  <p className="text-xs text-gray-400">Response Time</p>
+                  <p className={`text-lg font-bold
+                    ${health.responseTimeMs < 500
+                      ? "text-emerald-400"
+                      : health.responseTimeMs < 1500
+                      ? "text-amber-400"
+                      : "text-red-400"}`}>
+                    {health.responseTimeMs} ms
+                  </p>
+                </div>
               )}
 
-              {/* Error message when DOWN */}
+              {/* ERROR */}
               {!isUp && health.errorMessage && (
-                <p className="text-xs text-red-400 text-right max-w-xs leading-relaxed">
+                <p className="text-xs text-red-400 max-w-xs text-right">
                   {health.errorMessage}
                 </p>
               )}
 
-              {/* Subtle refreshing indicator */}
+              {/* LIVE INDICATOR */}
               {checking && (
-                <span className="flex items-center gap-1 text-xs text-gray-500">
-                  <Loader2 size={11} className="animate-spin" /> updating…
+                <span className="text-xs text-gray-500 flex items-center gap-1">
+                  <Loader2 size={12} className="animate-spin" />
+                  updating...
                 </span>
               )}
             </div>
+
           </div>
         )}
       </div>
-
-      {/* Explainer */}
-      <p className="text-xs text-gray-500 leading-relaxed">
-        Health is checked by sending a minimal 1-result patent search to
-        <span className="text-indigo-400"> api.lens.org/patent/search</span> with a 3-second timeout.
-        A 2xx response means <span className="text-emerald-400">UP</span>; any exception or timeout means
-        <span className="text-red-400"> DOWN</span>.
-      </p>
     </div>
-  );
+
+    {/* 🔥 STATUS EXPLAIN */}
+    <div className="bg-slate-900/60 border border-slate-700 rounded-xl p-4 text-xs text-gray-400">
+      System sends a small request to Lens API every 60 seconds.
+      <span className="text-emerald-400"> UP</span> means working,
+      <span className="text-red-400"> DOWN</span> means failure or timeout.
+    </div>
+
+  </div>
+);
 }
